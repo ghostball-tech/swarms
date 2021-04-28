@@ -7,7 +7,7 @@ Couzin model from Fanqi Zeng, recreating (most of) the dynamics in Couzin (2002)
 Changes: 
     a) included a 3rd spatial dimension for the boundary conditions, then promptly 
     comented out boundary condition
-    b) created function main_wrapper() to wrap the agent dynamics
+    b) created function swarm_wrapper() to wrap the agent dynamics
     c) wrote group_dir (Fanqi) and group_rho to measure agent responses
     d) added variation in individual agent r_o and r_a.
         agent.r_a , .r_o are now normally distributed with mean r_a, r_o resp
@@ -16,7 +16,7 @@ Changes:
     f) add some small (uniform) random noise to agent velocity at each time step
         NOTE: Couzin (2002) uses spherically wrapped gaussian with std = 0.05
         This noise adds quite a bit to convergence times (max_steps > 1000)
-    g) double loop over main_wrapper() for r_o_values and r_a_values
+    g) double loop over swarm_wrapper() for r_o_values and r_a_values
 
 I'm helping speed the convergence along by packing the initial positions into the 
 center of the field (see class Agent __init__ pos) and removing the boundary conditions
@@ -33,14 +33,14 @@ from math import *
 # from mpl_toolkits.mplot3d import Axes3D
 # import time
 
-# INPUT PARAMETERS INTO main_wrapper()
+# INPUT PARAMETERS INTO swarm_wrapper()
 # NOTE: we must have 1 < = r_o < = r_a
 dimension = '3d'    # 2d/3d
 n = 100             # number of agents
 max_steps = 5000
 r_o_values = np.linspace(0,15,16)
 r_a_values = np.linspace(0,15,16)
-# main_wrapper() takes only a single values of r_o and r_a
+# swarm_wrapper() takes only a single values of r_o and r_a
 # r_o_values, r_a_values are all the values we wish to loop over
 
 ###################################################
@@ -89,7 +89,7 @@ def rotation_matrix_about(axis, theta):
 
 ################################################################
     #
-def main_wrapper(n,max_steps,r_o,r_a,dimension):
+def swarm_wrapper(n,max_steps,r_o,r_a,dimension):
     
     dt = 0.1
     field_of_view = 3*pi/2
@@ -212,7 +212,7 @@ for iter in range(n_iter):
         for r_a in r_a_values:
             r_a_input = r_o + r_a
             #print(r_o,r_a)
-            abm_out = main_wrapper(n,max_steps,r_o,r_a_input,dimension)
+            abm_out = swarm_wrapper(n,max_steps,r_o,r_a_input,dimension)
             code_output.append([iter,r_o,r_a,abm_out])
             #SAVE / PERSIST abm_out with reference to the r_o and r_a value
 #print("---Run Time: %s seconds ---" % (time.time() - start_time))      
