@@ -29,17 +29,15 @@ Reflecting BC create edge effects
 import numpy as np
 from numpy.linalg import *
 from math import *
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import time
+
 
 # INPUT PARAMETERS INTO main_wrapper()
 # NOTE: we must have 1 < = r_o < = r_a
 dimension = '3d'    # 2d/3d
 n = 100             # number of agents
-max_steps = 100
-r_o_values = np.linspace(8,6,1)
-r_a_values = np.linspace(12,6,1)
+max_steps = 5000
+r_o_values = np.linspace(0,15,16)
+r_a_values = np.linspace(0,15,16)
 # main_wrapper() takes only a single values of r_o and r_a
 # r_o_values, r_a_values are all the values we wish to loop over
 
@@ -64,8 +62,8 @@ class Agent:
             self.vel[2] = 0
         self.vel = self.vel / norm(self.vel) * speed
         self.r_r = max([0,np.random.normal(loc = 1, scale = 0.1)])
-        self.r_o = max([self.r_r,np.random.normal(loc = r_o,scale = 1)])
-        self.r_a = max([self.r_o,np.random.normal(loc = r_a,scale = 1)])
+        self.r_o = max([self.r_r,np.random.normal(loc = r_o,scale = 0.1)])
+        self.r_a = max([self.r_o,np.random.normal(loc = r_a,scale = 0.1)])
     def update_position(self, delta_t):
         self.pos = self.pos + self.vel * delta_t
 ########################################################3
@@ -99,7 +97,6 @@ def main_wrapper(n,max_steps,r_o,r_a,dimension):
     [swarm.append(Agent(i, constant_speed,r_o,r_a,field,dimension)) for i in range(n)]
     
     t = 0
-    abm_out = []
     
     while t < max_steps:
         
@@ -138,8 +135,7 @@ def main_wrapper(n,max_steps,r_o,r_a,dimension):
                             d_o = d_o + neighbor.vel/norm(neighbor.vel)
                         elif norm_r < agent.r_a:
                             d_a = d_a + r_normalized
-                    # print('neighbor', neighbor.id, norm_r, r, d_r, d_o, d_a)
-            # print('agent_id', agent.id)
+
             if norm(d_r) != 0:
                 d = d_r
             elif norm(d_a) != 0 and norm(d_o) != 0:
@@ -163,7 +159,7 @@ def main_wrapper(n,max_steps,r_o,r_a,dimension):
            
         t = t+1
         # measuring summary statistics
-        if t == max_steps: #>= max_steps-100:
+        if t == max_steps: 
             sum_vel0, sum_vel1, sum_vel2 = 0, 0, 0
             group_center = 0
             for agent in swarm:
@@ -183,21 +179,21 @@ def main_wrapper(n,max_steps,r_o,r_a,dimension):
             
             group_dir = (sum_vel0**2 + sum_vel1**2+ sum_vel2**2)**0.5/n 
             group_rho = np.linalg.norm(sum_rho)/n
-        abm_out.append([group_dir,group_rho])
-          
-    return(abm_out)
+        
+    return([group_dir,group_rho])
 
 #################################
 #%% looping over parameters
 
-#start_time = time.time()
+n_iter = 30
+
 code_output = []
-for r_o in r_o_values:
-    for r_a in r_a_values:
-        r_a = r_o + r_a
-        #print(r_o,r_a)
-        abm_out = main_wrapper(n,max_steps,r_o,r_a,dimension)
-        code_output.append([r_o,r_a,abm_out])
-        #SAVE / PERSIST abm_out with reference to the r_o and r_a value
-#print("---Run Time: %s seconds ---" % (time.time() - start_time))      
+for iter in range(n_iter):
+    
+    for r_o in r_o_values:
+        for r_a in r_a_values:
+            r_a_input = r_o + r_a
+            #print(r_o,r_a)
+            abm_out = main_wrapper(n,max_steps,r_o,r_a_input,dimension)
+            code_output.append([iter,r_o,r_a,abm_out])
 
